@@ -6,17 +6,21 @@
     <script>
         $("#btn-next").click(function(event) {
             event.preventDefault();
-            if (isEmpty($('#email'))) {
-                alert("Vacio");
-            }else{
+            var forma = document.getElementById("email");
+            if(forma.checkValidity()){
+                $("#error-email").addClass("d-none");
+
                 let email = $("#email").val();
                 axios.get('/users/show/'+email)
                 .then(response => {
                     let user = response.data;
+                    $("#hidden_email").val($("#email").val());
                     $("#email").attr('disabled', true);
                     if (user.id){
-                        $("#remembered_user").val(1);
+                        $("#remembered_user").val(user.id);
                         $("#remembered_user_name").html(user.name);
+                        $("#name").attr('required', false);
+                        $("#phone").attr('required', false);
                         $("#personal-data-div").addClass("d-none");
                         $("#btn-next-div").addClass("d-none");
                         $("#remembered_user_div").removeClass("d-none");
@@ -24,6 +28,8 @@
                         $("#remembered_user").val(0);
                         $("#name").val('');
                         $("#phone").val('');
+                        $("#name").attr('required', true);
+                        $("#phone").attr('required', true);
                         $("#remembered_user_div").addClass("d-none");
                         $("#btn-next-div").addClass("d-none");
                         $("#personal-data-div").removeClass("d-none");
@@ -32,12 +38,15 @@
                 .catch(e => {
                     console.log(e);
                 })
+            }else{
+                $("#error-email").removeClass("d-none");
             }
         });
 
         $(".cancel-btn").click(function(event) {
             event.preventDefault();
             $("#email").val("");
+            $("#hidden_email").val();
             $("#remembered_user").val(0);
             $("#email").attr("disabled", false);
             $("#personal-data-div").addClass("d-none");
@@ -45,15 +54,9 @@
             $("#btn-next-div").removeClass("d-none"); 
         });
 
-        $(".continue-btn").click(function(event) {
-            event.preventDefault();
-            $("#step1").addClass("d-none");
-            $("#step2").removeClass("d-none");
+        $("#store-form").on("submit", function(){
+            $("#btn-submit").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...');
         });
-
-        function isEmpty(el){
-            return !$.trim(el.val());
-        }
     </script>
 @endpush
 
@@ -63,83 +66,75 @@
         <div class="col-5">
             <div class="card">
                 <div class="card-header text-center" style="border-bottom: solid 2px #007bff;">
-                    @if ($order->status == "CREATED")
-                        <img src="{{ asset('assets/images/order.png') }}" width="25%">
-                        <div class="row mt-3">
-                            <div class="col-12"><h5 class="card-title">Su orden ha sido creada!!</h5></div>
-                            <div class="col-12"><a class="btn btn-success btn-block" href="{{ $order->payment_url }}" target="_blank">PAGAR</a></div>
-                        </div>
-                    @elseif ($order->status == "PAYED")
-                        <img src="{{ asset('assets/images/check.png') }}" width="25%">
-                        <div class="row">
-                            <div class="col"><h5 class="card-title">Su orden ha sido completada!!</h5></div>
-                        </div>
-                    @elseif ($order->status == 'REJECTED')
-                        <img src="{{ asset('assets/images/error.png') }}" width="25%">
-                        <div class="row">
-                            <div class="col-12"><h5 class="card-title">Su orden ha sido rechazada!!</h5></div>
-                            <div class="col-12"><button class="btn btn-success btn-block">REINTENTAR</button></div>
-                        </div>
-                    @else
-                        <img src="{{ asset('assets/images/pending.png') }}" width="25%">
-                        <div class="row">
-                            <div class="col"><h5 class="card-title">Su orden está en proceso de pago!!</h5></div>
-                        </div>
-                    @endif
+                    <img src="{{ asset('assets/images/product.png') }}" width="35%" alt="Producto 1"> 
+                    <div class="row mt-2">
+                        <div class="col text-left"><h5 class="card-title">{{ $product->name }}</h5></div>
+                        <div class="col text-right"><h5 class="card-title">${{ $product->price }} USD</h5></div>
+                    </div>
                 </div>
+                
                 <div class="card-body">
-                    @if ($order->status == "CREATED")
-                        <ul class="list-group">
-                            <li class="list-group-item active" aria-current="true">Datos del Comprador</li>
-                            <li class="list-group-item">Correo Electrónico: <span class="font-weight-bold">{{ $order->user->email }}</span></li>
-                            <li class="list-group-item">Nombre: <span class="font-weight-bold">{{ $order->user->name }}</span></li>
-                            <li class="list-group-item">Teléfono: <span class="font-weight-bold">{{ $order->user->phone }}</span></li>
-                            <li class="list-group-item text-center"><a href="#">Actualizar mis datos</a></li>
-                        </ul>
-                    @endif
-                    <ul class="list-group">
-                        <li class="list-group-item active" aria-current="true">Detalles de la Orden</li>
-                        <li class="list-group-item">Referencia: <span class="font-weight-bold">Payment_{{ $order->id }}</span></li>
-                        <li class="list-group-item">Producto: <span class="font-weight-bold">{{ $order->product->name }}</span></li>
-                        <li class="list-group-item">Total: <span class="font-weight-bold">{{ $order->amount }} USD</span></li>
-                        <li class="list-group-item">Fecha: <span class="font-weight-bold">{{ date('d/m/Y H:i', strtotime($order->created_at)) }}</span></li>
-                        <li class="list-group-item">Estado: <span class="font-weight-bold">{{ $order->status }}</span></li>
-                        @if ($order->status == "CREATED")
-                            <li class="list-group-item"><a class="btn btn-success btn-block" href="{{ $order->payment_url }}" target="_blank">PAGAR</a></li>
-                        @elseif ($order->status == 'REJECTED')
-                            <li class="list-group-item"><button class="btn btn-success btn-block">REINTENTAR</button></li>
-                        @endif
-                    </ul>
+                    <form action="{{ route('orders.store') }}" method="POST" id="store-form">
+                        @csrf
+                        <input type="hidden" name="remembered_user" id="remembered_user" value="0">
+                        <input type="hidden" name="hidden_email" id="hidden_email">
+                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                        <div class="form-group text-center">
+                            <label for="email">Ingresa tu correo electrónico</label>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                  <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                                </div>
+                                <input type="email" class="form-control" name="email" id="email" placeholder="email@example.com" autofocus required>
+                            </div>
+                            <small class="text-danger d-none" id="error-email"><i class="fas fa-exclamation-circle"></i> Debe introducir un correo válido</small>
+                        </div>
+                       
+                        <div class="form-row d-none" id="personal-data-div">
+                            <div class="form-group col-md-12">
+                                Por favor, completa tus datos para continuar
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="name">Nombre y apellido</label>
+                                <input type="text" class="form-control" name="name" id="name" required>
+                                <small class="text-danger d-none" id="error-name">Debe introducir su nombre</small>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="phone">Teléfono</label>
+                                <input type="phone" class="form-control" name="phone" id="phone" required>
+                                <small class="text-danger d-none" id="error-phone">Debe introducir su número de teléfono</small>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <button class="btn btn-danger btn-block cancel-btn">Cancelar</button>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <button type="submit" class="btn btn-primary btn-block">Continuar</button>
+                            </div>
+                        </div>
+                        <div class="form-row d-none" id="remembered_user_div">
+                            <div class="form-group col-md-12 text-center">
+                                <h2><i class="far fa-hand-paper text-success"></i></h2>
+                                <h5>Bienvenido de vuelta <span class="font-weight-bold" id="remembered_user_name"></span>!!</h5>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <button class="btn btn-danger btn-block cancel-btn">Cancelar</button>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <button type="submit" class="btn btn-primary btn-block" id="btn-submit">Continuar</button>
+                            </div>
+                        </div>
+                        <div class="form-row" id="btn-next-div">
+                            <div class="form-group col-md-6">
+                                <a href="{{ route('index') }}" class="btn btn-danger btn-block">Cambiar Producto</a>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <button class="btn btn-primary btn-block" id="btn-next">Continuar</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
         <div class="col"></div>
-    </div>
-
-    <div class="modal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Actualizar Datos</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">    
-                    <div class="form-group">
-                        <label for="name">Nombre y Apellido</label>
-                        <input type="text" class="form-control" name="name" id="name" value={{ $order->user->name }}>
-                    </div>
-                    <div class="form-group">
-                        <label for="phone">Teléfono</label>
-                        <input type="phone" class="form-control" name="phone" id="phone" value={{ $order->user->phone }}>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-primary" id="save-btn">Guardar Cambios</button>
-                </div>
-            </div>
-        </div>
     </div>
 @endsection

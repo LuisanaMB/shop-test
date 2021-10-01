@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
 
 class OrderController extends Controller
@@ -36,9 +37,11 @@ class OrderController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create($product_id)
     {
-        //
+        $product = Product::find($product_id);
+
+        return view('step2')->with(compact('product'));
     }
 
     /**
@@ -57,14 +60,16 @@ class OrderController extends Controller
             $user = User::find($request->remembered_user);
         }
 
-        $order = new Order();
+        $product = Product::where('id', '=', $request->product_id)
+                    ->select('price')
+                    ->first();
+
+        $order = new Order($request->all());
         $order->user_id = $user->id;
-        $order->product_id = 1;
-        $order->amount = 50;
-        $order->status = 'CREATED';
+        $order->amount = $product->price;
         $order->save();
 
-        $reference = 'Payment_'.$order->id;
+        $reference = 'payment_'.$order->id;
         $paymentRequest = [
             'payment' => [
                 'reference' => $reference,
@@ -84,7 +89,6 @@ class OrderController extends Controller
         if ($response->isSuccessful()) {
             // STORE THE $response->requestId() and $response->processUrl() on your DB associated with the payment order
             // Redirect the client to the processUrl or display it on the JS extension
-            /*$response->processUrl();*/
             $order->payment_id = $response->requestId();
             $order->payment_url = $response->processUrl();
             $order->save();
@@ -108,7 +112,7 @@ class OrderController extends Controller
                     ->with('user', 'product')
                     ->first();
 
-        return view('step2')->with(compact('order'));
+        return view('step3')->with(compact('order'));
     }
 
     /**
@@ -126,13 +130,14 @@ class OrderController extends Controller
         if ($response->isSuccessful()) {
             // In order to use the functions please refer to the Dnetix\Redirection\Message\RedirectInformation class
             if ($response->status()->isApproved()) {
-                // The payment has been approved
                 $order->status = 'PAYED';
-                $order->payed_at = date('Y-m-d H:i:s');
-                $order->save();
-
-                return redirect()->route('orders.show', $order->id);
+            }else{
+                $order->status = $response->status()->status();
             }
+            $order->payed_at = date('Y-m-d H:i:s');
+            $order->save();
+
+            return redirect()->route('orders.show', $order->id);
         } else {
             // There was some error with the connection so check the message
             \Log::info('Error al consultar un pago con PlacetoPay'. $response->status()->message());
