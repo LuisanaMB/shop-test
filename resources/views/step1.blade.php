@@ -6,7 +6,7 @@
             <h3 class="font-italic">Elija el producto que desea comprar...</h3>
         </div>
         @foreach($products as $product)
-            <div class="col-3">
+            <div class="col-xl-3 col-lg-4 col-md-4 col-sm-6 col-xs-12 pt-4">
                 <div class="card" style="width: 18rem;">
                     <div class="card-header">
                         <img src="{{ asset('assets/images/product.png') }}" class="card-img-top" alt="...">

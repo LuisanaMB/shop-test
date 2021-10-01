@@ -20,7 +20,7 @@
 @section('content')
     <div class="row p-5" style="margin-right: 0 !important; margin-left: 0 !important;">
         <div class="col"></div>
-        <div class="col-5">
+        <div class="col-xl-5 col-lg-6">
             @if (Session::has('msj'))
                 <div class="alert alert-success">
                     <i class="far fa-check-circle"></i> {{ Session::get('msj') }}

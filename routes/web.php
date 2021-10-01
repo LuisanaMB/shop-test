@@ -21,9 +21,10 @@ Route::prefix('users')->group(function () {
 });
 
 Route::prefix('orders')->group(function () {
-    Route::get('create/{id}', [App\Http\Controllers\OrderController::class, 'create'])->name('orders.create');
-    Route::post('store', [App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
-    Route::get('show/{id}', [App\Http\Controllers\OrderController::class, 'show'])->name('orders.show'); 
-    Route::get('payment-response/{reference}', [App\Http\Controllers\OrderController::class, 'payment_response'])->name('orders.payment-response'); 
+   Route::get('/', [App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
+   Route::get('create/{id}', [App\Http\Controllers\OrderController::class, 'create'])->name('orders.create');
+   Route::post('store', [App\Http\Controllers\OrderController::class, 'store'])->name('orders.store');
+   Route::get('show/{id}', [App\Http\Controllers\OrderController::class, 'show'])->name('orders.show'); 
+   Route::get('payment-response/{reference}', [App\Http\Controllers\OrderController::class, 'payment_response'])->name('orders.payment-response'); 
  });
 

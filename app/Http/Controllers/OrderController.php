@@ -15,10 +15,9 @@ class OrderController extends Controller
     {
         // Fetch the Site Settings object
         $this->placetopay = new \Dnetix\Redirection\PlacetoPay([
-            'login' => '6dd490faf9cb87a9862245da41170ff2', // Provided by PlacetoPay
-            'tranKey' => '024h1IlD', // Provided by PlacetoPay
-            'baseUrl' => 'https://dev.placetopay.com/redirection/',
-            'timeout' => 10, // (optional) 15 by default
+            'login' => env('PLACETOPAY_LOGIN'), // Provided by PlacetoPay
+            'tranKey' => env('PLACETOPAY_TRANKEY'), // Provided by PlacetoPay
+            'baseUrl' => env('PLACETOPAY_BASE_URL'),
         ]);
     }
     
@@ -29,7 +28,11 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
+        $orders = Order::with('user', 'product')
+                    ->orderBy('id', 'DESC')
+                    ->get();
+        
+        return view('orders')->with(compact('orders'));
     }
 
     /**

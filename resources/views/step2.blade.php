@@ -55,7 +55,7 @@
         });
 
         $("#store-form").on("submit", function(){
-            $("#btn-submit").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...');
+            $(".btn-submit").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enviando...');
         });
     </script>
 @endpush
@@ -63,7 +63,7 @@
 @section('content')
     <div class="row p-5" style="margin-right: 0 !important; margin-left: 0 !important;">
         <div class="col"></div>
-        <div class="col-5">
+        <div class="col-xl-5 col-lg-6">
             <div class="card">
                 <div class="card-header text-center" style="border-bottom: solid 2px #007bff;">
                     <img src="{{ asset('assets/images/product.png') }}" width="35%" alt="Producto 1"> 
@@ -108,7 +108,7 @@
                                 <button class="btn btn-danger btn-block cancel-btn">Cancelar</button>
                             </div>
                             <div class="form-group col-md-6">
-                                <button type="submit" class="btn btn-primary btn-block">Continuar</button>
+                                <button type="submit" class="btn btn-primary btn-block btn-submit">Continuar</button>
                             </div>
                         </div>
                         <div class="form-row d-none" id="remembered_user_div">
@@ -120,7 +120,7 @@
                                 <button class="btn btn-danger btn-block cancel-btn">Cancelar</button>
                             </div>
                             <div class="form-group col-md-6">
-                                <button type="submit" class="btn btn-primary btn-block" id="btn-submit">Continuar</button>
+                                <button type="submit" class="btn btn-primary btn-block btn-submit">Continuar</button>
                             </div>
                         </div>
                         <div class="form-row" id="btn-next-div">
