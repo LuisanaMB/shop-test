@@ -18,9 +18,10 @@ class CreateNewOrdersTable extends Migration
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('product_id');
             $table->double('amount');
-            $table->string('status', 20)->default('CREATED')->comments('CREATED - PAYED - REJECTED');
+            $table->string('status', 20)->default('CREATED')->comment('CREATED - PAYED - REJECTED');
             $table->string('payment_id')->nullable();
             $table->string('payment_url')->nullable();
+            $table->datetime('payed_at')->nullable();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');
