@@ -36,7 +36,13 @@
                         <tr>
                             <td>{{ $order->id }}</td>
                             <td>{{ $order->user->email }}</td>
-                            <td>{{ $order->product->name }}</td>
+                            <td>
+                                @if (!is_null($order->product_id))
+                                    {{ $order->product->name }}
+                                @else
+                                    Dato no disponible
+                                @endif
+                            </td>
                             <td>{{ $order->amount }} USD</td>
                             <td>{{ $order->status }}</td>
                             <td>{{ date('d-m-Y H:i', strtotime($order->created_at)) }}</td>

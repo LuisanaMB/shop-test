@@ -16,8 +16,8 @@ class CreateNewOrdersTable extends Migration
         Schema::create('new_orders', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('product_id');
-            $table->double('amount');
+            $table->unsignedBigInteger('product_id')->nullable();
+            $table->double('amount')->nullable();
             $table->string('status', 20)->default('CREATED')->comment('CREATED - PAYED - REJECTED');
             $table->string('payment_id')->nullable();
             $table->string('payment_url')->nullable();

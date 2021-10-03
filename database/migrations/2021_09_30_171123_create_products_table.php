@@ -19,6 +19,14 @@ class CreateProductsTable extends Migration
             $table->double('price');
             $table->timestamps();
         });
+
+        DB::table('products')
+        ->insert([
+            ['name' => 'Producto 1', 'price' => 25],
+            ['name' => 'Producto 2', 'price' => 50],
+            ['name' => 'Producto 3', 'price' => 75],
+            ['name' => 'Producto 4', 'price' => 100],
+        ]);
     }
 
     /**

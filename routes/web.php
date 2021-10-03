@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('install', [App\Http\Controllers\SettingController::class, 'install']);
+
 Route::get('/', [App\Http\Controllers\ProductController::class, 'index'])->name('index');
 
 Route::prefix('users')->group(function () {
